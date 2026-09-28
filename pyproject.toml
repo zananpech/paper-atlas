@@ -1,0 +1,20 @@
+[project]
+name = "paper-atlas"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Zanan Pech", email = "zananpech9@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "chromadb>=1.5.9",
+    "docling>=2.130.0",
+]
+
+[project.scripts]
+paper-atlas = "paper_atlas:main"
+
+[build-system]
+requires = ["uv_build>=0.11.3,<0.12.0"]
+build-backend = "uv_build"
