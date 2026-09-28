@@ -16,6 +16,7 @@ class ChunkingMetadata(BaseModel):
     chunk_id: str
     chunk_size: int
     embedding_model: str
+    prompt_injection_detected: bool
     ingested_at: datetime
     page_start: Optional[int] = None
     page_end: Optional[int] = None

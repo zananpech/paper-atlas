@@ -14,6 +14,7 @@ from docling_core.transforms.chunker import BaseChunk
 from docling_core.types.doc import DoclingDocument
 
 from paper_atlas.schemas.ingestion import ChunkingMetadata
+from paper_atlas.guardrail import IngestionGuardrail
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,7 @@ class Ingestion:
         self.chroma_client = chromadb.PersistentClient(path=str(db_path))
         self.embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=EMBEDDING_MODEL)  
         self.collection = self.chroma_client.get_or_create_collection(COLLECTION_NAME, embedding_function=self.embedding_function)
+        self.ingestion_guardrail = IngestionGuardrail()
 
     def ingest(self, path: Path) -> IngestResult:
         """Ingest a document.
@@ -132,6 +134,7 @@ class Ingestion:
                 chunk_id=chunk_id,
                 chunk_size=len(chunk.text),
                 embedding_model=EMBEDDING_MODEL,
+                prompt_injection_detected=self.ingestion_guardrail.has_suspicious_instructions(chunk.text),
                 ingested_at=ingested_at,
                 page_start=pages[0] if pages else None,
                 page_end=pages[-1] if pages else None,
