@@ -10,6 +10,7 @@ requires-python = ">=3.11"
 dependencies = [
     "chromadb>=1.5.9",
     "docling>=2.130.0",
+    "sentence-transformers>=6.1.0",
 ]
 
 [project.scripts]

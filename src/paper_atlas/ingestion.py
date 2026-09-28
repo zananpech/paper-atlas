@@ -6,6 +6,8 @@ from enum import Enum
 from pathlib import Path
 
 import chromadb
+from chromadb.utils import embedding_functions
+
 from docling.chunking import HybridChunker
 from docling.document_converter import DocumentConverter
 from docling_core.transforms.chunker import BaseChunk
@@ -17,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 SUPPORTED_TYPES = {"pdf"}
 COLLECTION_NAME = "research_papers"
+EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 
 
 class IngestResult(Enum):
@@ -53,7 +56,8 @@ class Ingestion:
         self.converter = DocumentConverter()
         self.chunker = HybridChunker()  # reused for chunk() and contextualize()
         self.chroma_client = chromadb.PersistentClient(path=str(db_path))
-        self.collection = self.chroma_client.get_or_create_collection(COLLECTION_NAME)
+        self.embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=EMBEDDING_MODEL)  
+        self.collection = self.chroma_client.get_or_create_collection(COLLECTION_NAME, embedding_function=self.embedding_function)
 
     def ingest(self, path: Path) -> IngestResult:
         """Ingest a document.
@@ -127,6 +131,7 @@ class Ingestion:
                 title=title,
                 chunk_id=chunk_id,
                 chunk_size=len(chunk.text),
+                embedding_model=EMBEDDING_MODEL,
                 ingested_at=ingested_at,
                 page_start=pages[0] if pages else None,
                 page_end=pages[-1] if pages else None,
