@@ -15,17 +15,9 @@ from docling_core.types.doc import DoclingDocument
 
 from paper_atlas.schemas.ingestion import ChunkingMetadata
 from paper_atlas.guardrail import IngestionGuardrail
+from paper_atlas.config import COLLECTION_NAME, EMBEDDING_MODEL, SUPPORTED_TYPES
 
 logger = logging.getLogger(__name__)
-
-SUPPORTED_TYPES = {"pdf"}
-COLLECTION_NAME = "research_papers"
-EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
-
-
-class IngestResult(Enum):
-    INGESTED = "ingested"
-    SKIPPED = "skipped"
 
 
 def hash_file(path: Path) -> str:
@@ -61,7 +53,7 @@ class Ingestion:
         self.collection = self.chroma_client.get_or_create_collection(COLLECTION_NAME, embedding_function=self.embedding_function)
         self.ingestion_guardrail = IngestionGuardrail()
 
-    def ingest(self, path: Path) -> IngestResult:
+    def ingest(self, path: Path):
         """Ingest a document.
 
         Returns:
@@ -74,10 +66,10 @@ class Ingestion:
 
         if self._has_already_been_ingested(version_id):
             logger.info("Document %s has already been ingested.", path)
-            return IngestResult.SKIPPED
+            return 
 
         self._ingest_pdf(path, version_id)
-        return IngestResult.INGESTED
+        return
 
     def _has_already_been_ingested(self, version_id: str) -> bool:
         result = self.collection.get(where={"version_id": version_id}, limit=1)
@@ -170,4 +162,4 @@ class Ingestion:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     pipeline = Ingestion(ingestion_type="pdf")
-    print(pipeline.ingest(Path("papers/sample_research_paper.pdf")))
+    pipeline.ingest(Path("papers/sample_research_paper.pdf"))
