@@ -10,12 +10,14 @@ requires-python = ">=3.11"
 dependencies = [
     "chromadb>=1.5.9",
     "docling>=2.130.0",
+    "fastmcp>=2.0.0",
     "rank-bm25>=0.2.2",
     "sentence-transformers>=6.1.0",
 ]
 
 [project.scripts]
 paper-atlas = "paper_atlas:main"
+paper-atlas-mcp = "paper_atlas.mcp_server:main"
 
 [build-system]
 requires = ["uv_build>=0.11.3,<0.12.0"]

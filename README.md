@@ -2,16 +2,17 @@
 
 Paper Atlas is a lightweight research-paper ingestion and retrieval project built around PDF parsing, chunking, and local semantic search with ChromaDB.
 
-The project is currently focused on one core workflow:
+The project supports two core workflows:
 
 - ingest a PDF
 - convert it into document chunks with Docling
 - embed and store those chunks in a persistent local ChromaDB collection
-- support future retrieval/search over the indexed papers
+- search indexed papers with hybrid semantic and keyword retrieval
+- expose ingestion and retrieval through an MCP server
 
 ## Project status
 
-This repository is a working prototype in active development. The ingestion pipeline is implemented in `src/paper_atlas/ingestion.py`, while the retrieval layer is still a scaffold and the package entrypoint is minimal.
+This repository is a working prototype in active development. The ingestion pipeline, hybrid retrieval layer, and FastMCP server are implemented under `src/paper_atlas/`.
 
 ## Features
 
@@ -20,6 +21,8 @@ This repository is a working prototype in active development. The ingestion pipe
 - Persistent local vector storage with ChromaDB
 - Deduplication based on SHA-256 file hash
 - Chunk metadata for document ID, version ID, page range, and section information
+- Hybrid semantic and BM25 retrieval with reciprocal rank fusion
+- FastMCP server for use with MCP-compatible clients
 - Local storage under `./chroma_db`
 
 ## Repository structure
@@ -37,6 +40,7 @@ paper-atlas/
 │   └── paper_atlas/
 │       ├── __init__.py
 │       ├── ingestion.py
+│       ├── mcp_server.py
 │       ├── retrieval.py
 │       └── schemas/
 │           └── ingestion.py
@@ -49,6 +53,7 @@ paper-atlas/
 - ChromaDB for vector storage
 - Docling for PDF parsing and chunking
 - Pydantic models for metadata validation
+- FastMCP for the local MCP server
 - uv for dependency and project management
 
 ## Installation
@@ -105,6 +110,21 @@ python -m paper_atlas.ingestion
 
 This will attempt to ingest a sample file from `papers/sample_research_paper.pdf` if it exists.
 
+### Run the MCP server
+
+Start the FastMCP server over HTTP on `127.0.0.1:8000`:
+
+```bash
+uv run paper-atlas-mcp
+```
+
+The server exposes these tools:
+
+- `ingest_pdf(path)`: ingest a local PDF into the ChromaDB index
+- `search_papers(query, n_results=10)`: search indexed paper chunks and return their title, text, section, and page range
+
+The server uses the database path configured by `paper_atlas.config.DB_PATH` and can be connected to from an MCP-compatible client using the server URL exposed by FastMCP.
+
 ## Notes on behavior
 
 - Files are de-duplicated using a SHA-256 hash, so re-ingesting the same PDF does not create duplicate chunks.
@@ -116,7 +136,6 @@ This will attempt to ingest a sample file from `papers/sample_research_paper.pdf
 Planned work includes:
 
 - a proper CLI for ingestion and querying
-- semantic retrieval over indexed papers
 - filtering by title, section, and page range
 - ranking and answer generation on top of retrieved chunks
 
@@ -124,10 +143,9 @@ Planned work includes:
 
 Contributions are welcome. If you want to improve the pipeline, focus on:
 
-1. finishing the retrieval layer
-2. adding a usable command-line interface
-3. improving metadata and search filtering
-4. testing ingestion and indexing workflows on real paper sets
+1. adding a usable command-line interface
+2. improving metadata and search filtering
+3. testing ingestion and indexing workflows on real paper sets
 
 ## License
 
