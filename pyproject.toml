@@ -1,16 +1,18 @@
 [project]
 name = "paper-atlas"
 version = "0.1.0"
-description = "Add your description here"
+description = "Local research paper ingestion and hybrid retrieval powered by LangChain"
 readme = "README.md"
 authors = [
     { name = "Zanan Pech", email = "zananpech9@gmail.com" }
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "chromadb>=1.5.9",
     "docling>=2.130.0",
     "fastmcp>=2.0.0",
+    "langchain-chroma>=1.1.0",
+    "langchain-docling>=3.0.0",
+    "langchain-huggingface>=1.2.2",
     "rank-bm25>=0.2.2",
     "sentence-transformers>=6.1.0",
 ]

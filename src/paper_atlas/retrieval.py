@@ -3,8 +3,8 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-import chromadb
-from chromadb.utils import embedding_functions
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 from rank_bm25 import BM25Okapi
 
 from paper_atlas.config import COLLECTION_NAME, EMBEDDING_MODEL
@@ -33,15 +33,10 @@ class Retrieval:
                 fails. The original exception is logged and re-raised.
         """
         try:
-            self.chroma_client = chromadb.PersistentClient(path=str(db_path))
-            embedding_function = (
-                embedding_functions.SentenceTransformerEmbeddingFunction(
-                    model_name=EMBEDDING_MODEL
-                )
-            )
-            self.collection = self.chroma_client.get_collection(
-                COLLECTION_NAME,
-                embedding_function=embedding_function,
+            self.vector_store = Chroma(
+                collection_name=COLLECTION_NAME,
+                persist_directory=str(db_path),
+                embedding_function=HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL),
             )
 
             self.doc_ids: list[str] = []
@@ -78,10 +73,10 @@ class Retrieval:
                 exception is logged and re-raised.
         """
         try:
-            records = self.collection.get(include=["documents", "metadatas"])
+            records = self.vector_store.get()
             ids = records["ids"]
-            documents = records["documents"] or []
-            metadatas = records["metadatas"] or []
+            documents = [document.page_content for document in records["documents"]]
+            metadatas = [document.metadata for document in records["documents"]]
 
             if not (len(ids) == len(documents) == len(metadatas)):
                 raise ValueError("Chroma returned mismatched record fields")
@@ -118,11 +113,8 @@ class Retrieval:
         Returns:
             Chunk IDs ordered from most to least semantically similar.
         """
-        results = self.collection.query(
-            query_texts=[query],
-            n_results=limit,
-        )
-        return results["ids"][0] if results["ids"] else []
+        results = self.vector_store.similarity_search_with_score(query, k=limit)
+        return [document.metadata["chunk_id"] for document, _ in results]
 
     def _keyword_search(self, query: str, limit: int) -> list[str]:
         """Find chunks containing query terms, ranked by BM25.

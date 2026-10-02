@@ -12,6 +12,8 @@ from paper_atlas.config import DB_PATH
 logger = logging.getLogger(__name__)
 
 
+# FastMCP provides the MCP server runtime. LangChain is used for the vector
+# store, embeddings, and hybrid retrieval pipeline.
 mcp = FastMCP("paper-atlas")
 _retrieval: Retrieval | None = None
 _ingestion: Ingestion | None = None

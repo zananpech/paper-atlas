@@ -1,27 +1,28 @@
 # Paper Atlas
 
-Paper Atlas is a lightweight research-paper ingestion and retrieval project built around PDF parsing, chunking, and local semantic search with ChromaDB.
+Paper Atlas is a lightweight research-paper ingestion and retrieval project built around PDF parsing, chunking, and local hybrid search with LangChain and ChromaDB.
 
 The project supports two core workflows:
 
 - ingest a PDF
-- convert it into document chunks with Docling
+- parse and chunk it with Docling through LangChain's `DoclingLoader`
 - embed and store those chunks in a persistent local ChromaDB collection
 - search indexed papers with hybrid semantic and keyword retrieval
 - expose ingestion and retrieval through an MCP server
 
 ## Project status
 
-This repository is a working prototype in active development. The ingestion pipeline, hybrid retrieval layer, and FastMCP server are implemented under `src/paper_atlas/`.
+This repository is a working prototype in active development. LangChain provides the document loader, embeddings, and Chroma vector-store integration. FastMCP hosts the MCP tools.
 
 ## Features
 
-- PDF ingestion via Docling
-- Content chunking with a hybrid chunker
-- Persistent local vector storage with ChromaDB
+- PDF ingestion via LangChain's Docling integration
+- Docling `HybridChunker` chunking through `DoclingLoader` (the default chunker)
+- Persistent local vector storage through LangChain's Chroma integration
 - Deduplication based on SHA-256 file hash
 - Chunk metadata for document ID, version ID, page range, and section information
-- Hybrid semantic and BM25 retrieval with reciprocal rank fusion
+- LangChain Hugging Face embeddings with semantic and BM25 retrieval fused by reciprocal rank fusion
+- A lightweight ingestion guardrail flags chunks matching prompt-injection patterns; it records a metadata flag but does not block or modify content
 - FastMCP server for use with MCP-compatible clients
 - Local storage under `./chroma_db`
 
@@ -50,8 +51,9 @@ paper-atlas/
 ## Tech stack
 
 - Python 3.11+
-- ChromaDB for vector storage
-- Docling for PDF parsing and chunking
+- LangChain Chroma for vector storage and semantic retrieval
+- LangChain Hugging Face for local sentence-transformer embeddings
+- LangChain Docling (`DoclingLoader`) and Docling for PDF parsing and chunking
 - Pydantic models for metadata validation
 - FastMCP for the local MCP server
 - uv for dependency and project management
@@ -87,8 +89,10 @@ from paper_atlas.ingestion import Ingestion
 pipeline = Ingestion(ingestion_type="pdf", db_path="./chroma_db")
 result = pipeline.ingest(Path("papers/sample_research_paper.pdf"))
 
-print(result)  # IngestResult.INGESTED or IngestResult.SKIPPED
+print(result)  # None (the current method does not return an ingestion status)
 ```
+
+`DoclingLoader` uses Docling's `HybridChunker` by default and returns LangChain `Document` objects. Paper Atlas adds stable IDs and metadata to each chunk before indexing it. The `prompt_injection_detected` metadata field is set by a small regex-based check; a match is recorded, not blocked.
 
 This creates or reuses a ChromaDB collection named `research_papers` and stores indexed chunks with metadata such as:
 
@@ -123,7 +127,7 @@ The server exposes these tools:
 - `ingest_pdf(path)`: ingest a local PDF into the ChromaDB index
 - `search_papers(query, n_results=10)`: search indexed paper chunks and return their title, text, section, and page range
 
-The server uses the database path configured by `paper_atlas.config.DB_PATH` and can be connected to from an MCP-compatible client using the server URL exposed by FastMCP.
+FastMCP provides the MCP server runtime; LangChain's MCP adapters are not used to host it. The server uses the database path configured by `paper_atlas.config.DB_PATH` and can be connected to from an MCP-compatible client using the server URL exposed by FastMCP.
 
 ## Notes on behavior
 
