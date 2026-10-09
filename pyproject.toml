@@ -20,6 +20,10 @@ dependencies = [
 [project.scripts]
 paper-atlas = "paper_atlas:main"
 paper-atlas-mcp = "paper_atlas.mcp_server:main"
+paper-atlas-ingest = "paper_atlas.ingestion:main"
+paper-atlas-retrieve = "paper_atlas.retriever:main"
+paper-atlas-eval = "paper_atlas.evaluation.retrieval_eval:main"
+
 
 [build-system]
 requires = ["uv_build>=0.11.3,<0.12.0"]

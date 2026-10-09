@@ -2,6 +2,7 @@ import logging
 import re
 from collections import defaultdict
 from pathlib import Path
+import sys
 
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -12,7 +13,7 @@ from paper_atlas.config import COLLECTION_NAME, EMBEDDING_MODEL
 logger = logging.getLogger(__name__)
 
 
-class Retrieval:
+class Retriever:
     """Retrieve research paper chunks using semantic search and BM25.
 
     Chroma provides semantic results. An in-memory BM25 index provides keyword
@@ -75,8 +76,8 @@ class Retrieval:
         try:
             records = self.vector_store.get()
             ids = records["ids"]
-            documents = [document.page_content for document in records["documents"]]
-            metadatas = [document.metadata for document in records["documents"]]
+            documents = records["documents"]
+            metadatas = records["metadatas"]
 
             if not (len(ids) == len(documents) == len(metadatas)):
                 raise ValueError("Chroma returned mismatched record fields")
@@ -247,7 +248,15 @@ class Retrieval:
             raise
 
 
+def main():
+    retrieval = Retriever(db_path=Path("chroma_db"))
+
+    query = sys.argv[1]
+    results = retrieval.retrieve(query)
+    print(f"Retrieved {len(results)} chunks for query '{query}':")
+    for i, result in enumerate(results):
+        print(f"  {i+1}. {result['id']} {result['rrf_score']}")
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    retrieval = Retrieval(db_path=Path("chroma_db"))
-    print(retrieval.retrieve("model"))
+    main()

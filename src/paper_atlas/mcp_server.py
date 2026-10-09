@@ -6,7 +6,7 @@ from pathlib import Path
 from fastmcp import FastMCP
 
 from paper_atlas.ingestion import Ingestion
-from paper_atlas.retrieval import Retrieval
+from paper_atlas.retriever import Retriever
 from paper_atlas.config import DB_PATH
 
 logger = logging.getLogger(__name__)
@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 # FastMCP provides the MCP server runtime. LangChain is used for the vector
 # store, embeddings, and hybrid retrieval pipeline.
 mcp = FastMCP("paper-atlas")
-_retrieval: Retrieval | None = None
+_retrieval: Retriever | None = None
 _ingestion: Ingestion | None = None
 
-# lazy initialization of Retrieval and Ingestion to avoid ChromaDB connection on import
-def _get_retrieval() -> Retrieval:
+# lazy initialization of Retriever and Ingestion to avoid ChromaDB connection on import
+def _get_retrieval() -> Retriever:
     global _retrieval
     if _retrieval is None:
-        _retrieval = Retrieval(db_path=Path(DB_PATH))
+        _retrieval = Retriever(db_path=Path(DB_PATH))
     return _retrieval
 
 

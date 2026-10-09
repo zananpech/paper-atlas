@@ -42,7 +42,7 @@ paper-atlas/
 │       ├── __init__.py
 │       ├── ingestion.py
 │       ├── mcp_server.py
-│       ├── retrieval.py
+│       ├── retriever.py
 │       └── schemas/
 │           └── ingestion.py
 └── .venv/

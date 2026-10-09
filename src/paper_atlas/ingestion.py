@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import sys
 from collections.abc import Iterable
 from datetime import datetime, timezone
 from pathlib import Path
@@ -171,8 +172,24 @@ class Ingestion:
         self._index_documents(documents, path, version_id)
         logger.info("Ingestion completed for %s", path)
 
+def main() -> None:
+    """CLI entry point for paper ingestion."""
+
+    logging.basicConfig(level=logging.INFO)
+    pdf_path = (
+        Path(sys.argv[1])
+        if len(sys.argv) > 1
+        else Path("papers/Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations.pdf")
+    )
+
+    if not pdf_path.exists():
+        logger.error("File not found: %s", pdf_path)
+        sys.exit(1)
+
+    pipeline = Ingestion(ingestion_type="pdf")
+    pipeline.ingest(pdf_path)
+
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    pipeline = Ingestion(ingestion_type="pdf")
-    pipeline.ingest(Path("papers/sample_research_paper.pdf"))
+    main()
+

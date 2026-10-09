@@ -1,0 +1,80 @@
+[
+  {
+    "query_id": "q-onehop-001",
+    "category": "one_hop",
+    "query": "Which Wikipedia dump was used as the non-parametric knowledge source in RAG experiments?",
+    "relevant_doc_ids": [
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-18"
+    ]
+  },
+  {
+    "query_id": "q-onehop-002",
+    "category": "one_hop",
+    "query": "What pre-trained model is used as the generator component in RAG and how many parameters does it have?",
+    "relevant_doc_ids": [
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-13"
+    ]
+  },
+  {
+    "query_id": "q-onehop-003",
+    "category": "one_hop",
+    "query": "On which task or dataset did BM25 outperform RAG's dense retriever?",
+    "relevant_doc_ids": [
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-40"
+    ]
+  },
+  {
+    "query_id": "q-onehop-004",
+    "category": "one_hop",
+    "query": "What decoding procedures are proposed for RAG-Sequence models at test time?",
+    "relevant_doc_ids": [
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-16",
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-17"
+    ]
+  },
+  {
+    "query_id": "q-multihop-001",
+    "category": "multi_hop",
+    "query": "How do RAG-Sequence and RAG-Token models differ in how they marginalize over retrieved documents to produce output tokens?",
+    "relevant_doc_ids": [
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-9",
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-10"
+    ]
+  },
+  {
+    "query_id": "q-multihop-002",
+    "category": "multi_hop",
+    "query": "What components are kept fixed versus fine-tuned during the end-to-end training of DPR and BART in RAG?",
+    "relevant_doc_ids": [
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-12",
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-14"
+    ]
+  },
+  {
+    "query_id": "q-multihop-003",
+    "category": "multi_hop",
+    "query": "How does index hot-swapping demonstrate updating world knowledge between Wikipedia dumps without retraining the parametric model?",
+    "relevant_doc_ids": [
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-18",
+      "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks-with-annotations-26a1970976f57d623fd84d6a9b34ad9052888c6c0ceb5c8161276171e6734a8d-chunk-41"
+    ]
+  },
+  {
+    "query_id": "q-notexist-001",
+    "category": "not_exist",
+    "query": "What batch size and cosine learning rate schedule was used to pre-train the LLaMA-3 foundation model?",
+    "relevant_doc_ids": []
+  },
+  {
+    "query_id": "q-notexist-002",
+    "category": "not_exist",
+    "query": "How does Paper Atlas implement graph neural networks for citation graph link prediction in Neo4j?",
+    "relevant_doc_ids": []
+  },
+  {
+    "query_id": "q-notexist-003",
+    "category": "not_exist",
+    "query": "What are the Phase 3 clinical trial efficacy results for CRISPR gene therapy in sickle cell disease?",
+    "relevant_doc_ids": []
+  }
+]
