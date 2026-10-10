@@ -7,7 +7,7 @@ from paper_atlas.evaluation.metrics import (
     recall_at_k,
     reciprocal_rank,
 )
-from paper_atlas.evaluation.retrieval_eval import EvaluationSummary, QueryEvalResult, evaluate_retriever
+from paper_atlas.evaluation.retriever_eval import EvaluationSummary, QueryEvalResult, evaluate_retriever
 
 __all__ = [
     "EvalDataset",

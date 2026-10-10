@@ -1,3 +1,5 @@
+from paper_atlas.config import RERANKER_MODEL
+from paper_atlas.config import DB_PATH
 import logging
 import re
 from collections import defaultdict
@@ -7,10 +9,14 @@ import sys
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from rank_bm25 import BM25Okapi
+from sentence_transformers import CrossEncoder
 
 from paper_atlas.config import COLLECTION_NAME, EMBEDDING_MODEL
+from paper_atlas.langfuse_client import get_langfuse
+from langfuse import observe
 
 logger = logging.getLogger(__name__)
+langfuse = get_langfuse()
 
 
 class Retriever:
@@ -43,8 +49,9 @@ class Retriever:
             self.doc_ids: list[str] = []
             self.records_by_id: dict[str, dict] = {}
             self.bm25: BM25Okapi | None = None
-
             self.refresh_index()
+            self.cross_encoder = CrossEncoder(RERANKER_MODEL)
+
         except Exception:
             logger.exception("Failed to initialize retrieval from %s", db_path)
             raise
@@ -180,6 +187,27 @@ class Retriever:
             reverse=True,
         )[:top_n]
 
+    def _rerank(self, query: str, chunks: list[dict]) -> list[tuple[str, float]]:
+        """Re‑rank chunks using a cross‑encoder.
+
+        Args:
+            query: Natural language question or search phrase.
+            chunks: List of chunk records (dicts) with ``id`` and ``text`` fields.
+
+        Returns:
+            ``(chunk_id, rerank_score)`` pairs sorted by descending score.
+        """
+        # Extract text for the model
+        texts = [chunk["text"] for chunk in chunks]
+        scores = self.cross_encoder.predict([(query, txt) for txt in texts])
+        return sorted(
+            [(chunk["id"], score) for chunk, score in zip(chunks, scores)],
+            key=lambda item: item[1],
+            reverse=True,
+        )
+
+
+    @observe(name="retrieve")
     def retrieve(self, query: str, n_results: int = 10) -> list[dict]:
         """Search for relevant paper chunks using both retrieval methods.
 
@@ -239,9 +267,20 @@ class Retriever:
                 len(keyword_ids),
             )
 
+            # Re‑rank combined candidates using their full text
+            records = [self.records_by_id[doc_id] for doc_id, _ in combined]
+            reranked_results = self._rerank(query, records)
+
+      
+            # Filter out zero‑score entries
+            filtered = [(doc_id, score) for doc_id, score in reranked_results if score > 0.0]
+            # Map doc_id to its RRF score
+            rrf_map = {doc_id: rrf_score for doc_id, rrf_score in combined}
+            # Take top‑n based on rerank score
+            top = filtered[:n_results]
             return [
-                {**self.records_by_id[doc_id], "rrf_score": score}
-                for doc_id, score in combined
+                {**self.records_by_id[doc_id], "rrf_score": rrf_map.get(doc_id, 0.0), "rerank_score": score}
+                for doc_id, score in top
             ]
         except Exception:
             logger.exception("Retrieval failed for query %r", query)
@@ -249,13 +288,15 @@ class Retriever:
 
 
 def main():
-    retrieval = Retriever(db_path=Path("chroma_db"))
+    retrieval = Retriever(db_path=Path(DB_PATH))
 
     query = sys.argv[1]
     results = retrieval.retrieve(query)
     print(f"Retrieved {len(results)} chunks for query '{query}':")
     for i, result in enumerate(results):
         print(f"  {i+1}. {result['id']} {result['rrf_score']}")
+
+    langfuse.flush()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
